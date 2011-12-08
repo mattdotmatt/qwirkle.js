@@ -34,18 +34,79 @@ exports.Game = function() {
 			'pl-y', 'pl-b', 'pl-b', 'pl-b', 'pl-g', 'pl-g', 'pl-g', 'pl-o',
 			'pl-o', 'pl-o', 'pl-p', 'pl-p', 'pl-p' ];
 	;
+	var currentPlayers = [];
+	var PlayerExists = function(playersName) {
+		var playerExists = false;
+		for ( var i = 0; i < currentPlayers.length; i++) {
+			if (currentPlayers[i].name == playersName) {
+				playerExists = true;
+			}
+		}
+		return playerExists;
+	};
+
 	return {
+
+		MyDetails : function(playersName) {
+
+			for ( var i = 0; i < currentPlayers.length; i++) {
+				if (currentPlayers[i].name == playersName) {
+					return currentPlayers[i];
+				}
+			}
+			return null;
+
+		},
+
+		players : {
+			CurrentPlayers : function() {
+				return currentPlayers;
+			}
+		},
+		Leave : function(playersName) {
+			for ( var i = 0; i < currentPlayers.length; i++) {
+				if (currentPlayers[i].name == playersName) {
+					currentPlayers.remove(i);
+				}
+			}
+
+		},
+		Join : function(playersName) {
+			var playerAdded = false;
+
+			if (currentPlayers.length !== 4) {
+				if (!PlayerExists(playersName)) {
+
+					var newPlayer = {
+						name : playersName,
+						hand : this.GetMyFirstTiles()
+					};
+					currentPlayers.push(newPlayer);
+					playerAdded = true;
+				}
+			}
+			return playerAdded;
+		},
+		Error : function() {
+			return 'Bad move';
+		},
 		GetMyFirstTiles : function() {
 			return this.ReplenishMyTiles(6);
 		},
 		TakeTurn : function(tilesToLay) {
-			this.ValidateMove(tilesToLay)
-			this.LayTiles(tilesToLay);
-			return this.ReplenishMyTiles(tilesToLay.length);
+			if (this.ValidateMove(tilesToLay)) {
+				this.LayTiles(tilesToLay);
+				this.ScoreMove(tilesToLay);
+				return this.ReplenishMyTiles(tilesToLay.length);
+			}
+			return null;
+
 		},
 		LayTiles : function(tilesToLay) {
 		},
 		ValidateMove : function(tilesToLay) {
+		},
+		ScoreMove : function(tilesToLay) {
 		},
 
 		ReplenishMyTiles : function(numberOfTiles) {

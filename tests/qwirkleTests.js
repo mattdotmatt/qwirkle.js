@@ -1,10 +1,22 @@
-var vows = require('vows'), assert = require('assert'), Qwirkle = require('../qwirkle');
+var vows = require('vows'), assert = require('assert'), Qwirkle = require('../qwirkle.js');
 
 var Game = Qwirkle.Game;
-vows.describe('Bag contents at the start of the game').addBatch( {
-	'When starting the game' : {
+
+vows.describe('Getting my details').addBatch( {
+	'When playing the game' : {
 		topic : new (Game)(),
-		'the bag should contain 108 tiles' : function(game) {
+		'I should be able to get at my details' : function(game) {
+			game.Join('matt');
+			var myDetails = game.MyDetails('matt');
+			assert.equal(myDetails.name, 'matt');
+		}
+	}
+}).run(); // Run it
+
+vows.describe('Bag contents at the start of the game').addBatch( {
+	'When  starting the game' : {
+		topic : new (Game)(),
+		'the bag should contain 108  tiles' : function(game) {
 			assert.equal(game.bag.Contents().length, 108);
 		}
 	},
@@ -21,11 +33,16 @@ vows
 		.addBatch(
 				{
 
-					'When taking a turn of 6 tiles' : {
+					'When replenishing' : {
 						topic : new (Game)(),
-						' you should get back 6 tiles' : function(game) {
-							var tiles = game.ReplenishMyTiles(6);
-							assert.equal(tiles.length, 6);
+						' your hand should be updated  to 6 tiles' : function(
+								game) {
+							var myHand = [ {
+								tile : "st-r"
+							} ];
+
+							game.ReplenishMyTiles();
+
 						}
 					},
 					'and the bag' : {
@@ -35,9 +52,9 @@ vows
 							assert.equal(game.bag.Contents().length, 102);
 						}
 					},
-					'When playing the game, taking a turn when fewer than 6 tiles left' : {
+					'When playing the game,  taking a turn when fewer than 6 tiles left' : {
 						topic : new (Game)(),
-						'should leave 0 tiles' : function(game) {
+						'should  leave 0 tiles' : function(game) {
 							game.bag.Contents().length = 4;
 							game.ReplenishMyTiles(6);
 							assert.equal(game.bag.Contents().length, 0);
@@ -94,9 +111,9 @@ vows
 							}
 						}
 					},
-					'When taking all the turns with a limited set' : {
+					'When taking all the  turns with a limited set' : {
 						topic : new (Game)(),
-						' you should get back the full set used' : function(
+						' you should get back the  full set used' : function(
 								game) {
 							game.bag.Contents = function() {
 								return [ 'sr', 'sc', 'sr' ];
@@ -107,116 +124,76 @@ vows
 					}
 
 				}).run(); // Run it
-
-vows.describe('Shaking the bag').addBatch( {
-
-	'When taking a turn' : {
-		topic : new (Game)(),
-		' the bag should be shaken' : function(game) {
-			var count = 0;
-			game.bag.Shake = function() {
-				count++;
-			};
-			var tiles = game.ReplenishMyTiles(1);
-			assert.equal(count, 1);
-		}
-	}
-}).run(); // Run it
-
-vows.describe('My tiles').addBatch( {
-
-	'When starting the game' : {
-		topic : new (Game)(),
-		' I should have 6 tiles from the bag' : function(game) {
-
-			var myTiles = game.GetMyFirstTiles();
-			assert.equal(myTiles.length, 6);
-			assert.equal(game.bag.Contents().length, 102);
-		}
-	}
-}).run(); // Run it
-
-vows.describe('Laying the tiles').addBatch( {
-
-	'When laying 3 tiles' : {
-		topic : new (Game)(),
-		' 3 tiles should be retrieved from the bag' : function(game) {
-			var tilesToLay = [ {
-				positionX : "1",
-				positionY : "1",
-				tile : "st-r"
-			}, {
-				positionX : "2",
-				positionY : "1",
-				tile : "st-r"
-			}, {
-				positionX : "3",
-				positionY : "1",
-				tile : "st-r"
-			} ];
-			var myNewTiles = game.TakeTurn(tilesToLay);
-			assert.equal(myNewTiles.length, 3);
-			assert.equal(game.bag.Contents().length, 105);
-
-		}
-	}
-
-}).run(); // Run it
-
-vows
-		.describe('Game flow')
-		.addBatch(
-				{
-
-					'When playing the game' : {
-						topic : new (Game)(),
-						' the following steps should be taken when a move is good' : function(
-								game) {
-
-							var tilesToLay = [ {
-								positionX : "1",
-								positionY : "1",
-								tile : "st-r"
-							}, {
-								positionX : "2",
-								positionY : "1",
-								tile : "st-r"
-							}, {
-								positionX : "3",
-								positionY : "1",
-								tile : "st-r"
-							} ];
-
-							// LayTiles
-							// ValidateMove
-							// ShakeBag
-							// GetTiles
-
-							var countLay = 0;
-							var countValidate = 0;
-							var countGetTiles = 0;
-
-							game.LayTiles = function() {
-								countLay++;
-								return true;
-							};
-
-							game.ValidateMove = function() {
-								countValidate++;
-								return true;
-							};
-
-							game.ReplenishMyTiles = function() {
-								countGetTiles++;
-								return true;
-							};
-
-							game.TakeTurn(tilesToLay);
-
-							assert.equal(countLay, 1);
-							assert.equal(countValidate, 1);
-							assert.equal(countGetTiles, 1);
-
-						}
-					}
-				}).run(); // Run it
+/*
+ * vows.describe('Shaking the bag').addBatch( {
+ * 
+ * 'When taking a turn' : { topic : new (Game)(), ' the bag should be shaken' :
+ * function(game) { var count = 0; game.bag.Shake = function() { count++; }; var
+ * tiles = game.ReplenishMyTiles(1); assert.equal(count, 1); } } }).run(); //
+ * Run it
+ * 
+ * vows.describe('My tiles').addBatch( {
+ * 
+ * 'When starting the game' : { topic : new (Game)(), ' I should have 6 tiles
+ * from the bag' : function(game) {
+ * 
+ * var myTiles = game.GetMyFirstTiles(); assert.equal(myTiles.length, 6);
+ * assert.equal(game.bag.Contents().length, 102); } } }).run(); // Run it
+ * 
+ * vows.describe('Laying the tiles').addBatch( {
+ * 
+ * 'When laying 3 tiles' : { topic : new (Game)(), ' 3 tiles should be retrieved
+ * from the bag' : function(game) { var tilesToLay = [ { positionX : "1",
+ * positionY : "1", tile : "st-r" }, { positionX : "2", positionY : "1", tile :
+ * "st-r" }, { positionX : "3", positionY : "1", tile : "st-r" } ]; var
+ * myNewTiles = game.TakeTurn(tilesToLay); assert.equal(myNewTiles.length, 3);
+ * assert.equal(game.bag.Contents().length, 105); } }
+ * 
+ * }).run(); // Run it
+ * 
+ * vows .describe('Game flow') .addBatch( { 'When playing the game' : { topic :
+ * new (Game)(), ' the following steps should be taken when a move is good' :
+ * function( game) {
+ * 
+ * var tilesToLay = [ { positionX : "1", positionY : "1", tile : "st-r" }, {
+ * positionX : "2", positionY : "1", tile : "st-r" }, { positionX : "3",
+ * positionY : "1", tile : "st-r" } ]; // LayTiles // ValidateMove // ShakeBag //
+ * GetTiles
+ * 
+ * var countLay = 0; var countValidate = 0; var countGetTiles = 0; var
+ * countScoreMove = 0;
+ * 
+ * game.LayTiles = function() { countLay++; return true; };
+ * 
+ * game.ValidateMove = function() { countValidate++; return true; };
+ * 
+ * game.ScoreMove = function() { countScoreMove++; return true; };
+ * 
+ * game.ReplenishMyTiles = function() { countGetTiles++; return true; };
+ * 
+ * game.TakeTurn(tilesToLay);
+ * 
+ * assert.equal(countLay, 1); assert.equal(countScoreMove, 1);
+ * assert.equal(countValidate, 1); assert.equal(countGetTiles, 1); } },
+ * 
+ * 'When a bad move is made' : { topic : new (Game)(), ' the user should be
+ * warned and the move negated' : function( game) {
+ * 
+ * var tilesToLay = [ { positionX : "1", positionY : "1", tile : "st-r" }, {
+ * positionX : "2", positionY : "1", tile : "st-r" }, { positionX : "3",
+ * positionY : "1", tile : "st-r" } ];
+ * 
+ * var countLay = 0; var countValidate = 0; var countGetTiles = 0;
+ * 
+ * game.LayTiles = function() { countLay++; return true; };
+ * 
+ * game.ValidateMove = function() { countValidate++; return false; };
+ * 
+ * game.ReplenishMyTiles = function() { countGetTiles++; return true; };
+ * 
+ * game.TakeTurn(tilesToLay); var error = game.Error();
+ * 
+ * assert.equal(error, 'Bad move'); assert.equal(countValidate, 1);
+ * assert.equal(countGetTiles, 0); assert.equal(countLay, 0); } } }).run(); //
+ * Run it
+ */
